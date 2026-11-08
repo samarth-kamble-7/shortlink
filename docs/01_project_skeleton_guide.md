@@ -1,6 +1,6 @@
 # Episode 1: Project Skeleton & Core Infrastructure
 
-This guide provides the chapter breakdown, presenter script, code talking points, and verification commands for recording this milestone.
+This document contains the exact recording script, talking points, file walkthrough, and verification commands for Episode 1.
 
 ---
 
@@ -26,84 +26,70 @@ This guide provides the chapter breakdown, presenter script, code talking points
 
 ---
 
-## Video Talking Points & Script
+## Exact Recording Script & Walkthrough
 
-### 1. Hook & Introduction (00:00 - 01:30)
-- **The Hook:** Don't just build another tutorial CRUD app. We are building **ShortLink**—a scalable, distributed URL shortener and real-time click analytics platform.
-- **Why this project matters:** URL shorteners are the classic backend/distributed systems interview problem (handling millions of redirects with sub-10ms latency).
-- **Architecture Highlights:**
-  - 64-bit Twitter Snowflake ID generation + Base62 encoding
-  - Multi-tier caching (Caffeine L1 + Redis L2)
-  - Async click analytics streaming via Apache Kafka
-  - Consistent-hash database sharding across PostgreSQL instances
-  - Redis Token Bucket rate limiting via Lua scripts
+### Step 1: The Chapter Title & Goal (15–20 Seconds)
+
+**What to say:**
+
+> "In this first commit, we are laying the foundational skeleton for ShortLink. Before writing any business logic, a senior engineer always sets up three things: containerized infrastructure, production-grade configuration, and automated integration testing."
 
 ---
 
-### 2. File-by-File Walkthrough (01:30 - 06:00)
+### Step 2: Walkthrough of the Key Files (Show These on Screen)
 
-#### File 1: `docker-compose.yml`
-- **What to show:** Open `docker-compose.yml`.
-- **Key Talking Points:**
-  - Pinned to `postgres:16-alpine` for lightweight, reproducible local development.
-  - Notice the `healthcheck` block (`pg_isready -U shortlink -d shortlink`). This ensures our Spring Boot app never attempts to connect before PostgreSQL has finished initializing.
+#### 1. `docker-compose.yml`
+- **What to show on screen:** Open `docker-compose.yml`.
+- **What to say:**
+  > "Instead of installing PostgreSQL directly on our host machine, we use Docker Compose with `postgres:16-alpine`. Notice the healthcheck with `pg_isready`: this guarantees the container is actually accepting connections before anything tries to connect to it."
 
-#### File 2: `src/main/resources/application.yml`
-- **What to show:** Open `src/main/resources/application.yml`.
-- **Key Talking Points:**
-  - `jpa.hibernate.ddl-auto: validate`: **Crucial senior practice.** Never allow Hibernate to auto-generate or alter tables in production (`update` or `create`). Flyway migrations will be the single source of truth.
-  - `jpa.open-in-view: false`: Closes database connections immediately after service transactions complete, rather than keeping connections open during HTTP response serialization. Prevents connection pool starvation.
-  - `hibernate.jdbc.time_zone: UTC`: Enforces UTC across all database timestamps to avoid time skew when running across multiple servers.
-  - `management.endpoints.web.exposure.include: health,info,metrics`: Exposes Spring Boot Actuator for health monitoring and Prometheus metrics.
+#### 2. `application.yml`
+- **What to show on screen:** Open `src/main/resources/application.yml`.
+- **Key points to explain:**
+  - **`ddl-auto: validate`**: "Never let Hibernate auto-create or alter tables in production (update or create). We set it to validate because Flyway will be our single source of truth for migrations."
+  - **`open-in-view: false`**: "Spring Boot defaults open-in-view to true, which keeps the database connection open during HTTP JSON serialization. Turning it off releases the connection back to the HikariCP pool immediately after the service transaction ends."
+  - **`time_zone: UTC`**: "URL shorteners handle time-based link expiries and click analytics. Locking the database and Hibernate to UTC prevents timezone bugs when running across multiple servers."
 
-#### File 3: Package Structure (Modular Monolith)
-- **What to show:** Expand `src/main/java/com/shortlink` in the project explorer:
-  - `api`: REST controllers and DTOs
-  - `service`: Core business logic
-  - `idgen`: Snowflake generator and Base62 encoding
-  - `domain`: JPA entities and repository interfaces
-  - `config`: Infrastructure, security, and bean configurations
-- **Key Talking Points:**
-  - We start as a **Modular Monolith**. Avoid premature microservices. Clean package boundaries ensure parts of the system (like the Kafka Analytics Consumer in Phase 3) can be extracted into standalone services effortlessly.
+#### 3. Package Structure (Modular Monolith)
+- **What to show on screen:** Expand `src/main/java/com/shortlink` in your IDE sidebar:
+  - `api` $\rightarrow$ REST Controllers & Request/Response DTOs
+  - `service` $\rightarrow$ Core business logic
+  - `idgen` $\rightarrow$ Snowflake generator & Base62 encoder
+  - `domain` $\rightarrow$ JPA entities & repositories
+  - `config` $\rightarrow$ Infrastructure & Security
+- **What to say:**
+  > "We are following a Modular Monolith architecture. We don't jump straight into microservices on Day 1. Instead, we enforce clean package boundaries with single responsibilities so components can easily be extracted into independent services later (like the Kafka Analytics Consumer in Phase 3)."
 
-#### File 4: `SecurityConfig.java` & `PingController.java`
-- **What to show:** Open `SecurityConfig.java` and `PingController.java`.
-- **Key Talking Points:**
-  - `spring-boot-starter-security` is present for future authentication (Phase 4). To unblock our initial APIs without 401 Unauthorized errors, `SecurityConfig` permits all requests and disables CSRF for REST endpoints.
-  - `PingController` at `/api/v1/ping` provides an instant sanity-check probe to verify Tomcat and the web pipeline independently of database queries.
+#### 4. `SecurityConfig.java` & `PingController.java`
+- **What to show on screen:** Open `SecurityConfig.java` and `PingController.java`.
+- **What to say:**
+  > "Because we have Spring Security in our classpath for future authentication in Phase 4, it secures everything by default. In SecurityConfig, we configure permitAll() and disable CSRF for REST APIs so our development endpoints are unblocked. We also added a simple PingController at `/api/v1/ping` as a lightweight sanity check to verify the web server is responsive."
 
-#### File 5: `ShortlinkApplicationTests.java` (Testcontainers)
-- **What to show:** Open `src/test/java/com/shortlink/ShortlinkApplicationTests.java`.
-- **Key Talking Points:**
-  - Modern Spring Boot 3.1+ feature: `@ServiceConnection` with `@Testcontainers`.
-  - Avoid H2 in-memory databases—their SQL dialect and indexing differ from PostgreSQL. Testcontainers spins up a real, disposable PostgreSQL container during tests with zero manual configuration.
+#### 5. `ShortlinkApplicationTests.java` (Testcontainers)
+- **What to show on screen:** Open `ShortlinkApplicationTests.java`.
+- **What to say:**
+  > "In modern backend development, we avoid in-memory databases like H2 because their SQL dialect differs from PostgreSQL. Using Testcontainers with `@ServiceConnection`, Spring Boot automatically spins up an ephemeral, real PostgreSQL Docker container to run our integration smoke tests with zero manual setup."
 
 ---
 
-### 3. Terminal Verification Demo (06:00 - 08:00)
+### Step 3: Terminal Demo (The Live Proof)
 
-Run these commands live to demonstrate verification:
+**What to run in your terminal to show viewers:**
 
-1. **Verify Database Container Health:**
+1. **Show the healthy container:**
    ```bash
    docker compose ps
    ```
-   *(Container status should display `healthy` on port 5432)*
 
-2. **Run Integration Smoke Test:**
+2. **Run the test suite:**
    ```bash
    ./mvnw test
    ```
-   *(Show Maven console output pulling/running PostgreSQL container and achieving `BUILD SUCCESS`)*
+   *(Point out the `BUILD SUCCESS` and that Testcontainers booted PostgreSQL dynamically.)*
 
-3. **Verify Actuator Health Check:**
+3. **Test the live endpoints:**
    ```bash
    curl -i http://localhost:8080/actuator/health
-   ```
-   *(Show HTTP 200 with database status `UP`)*
-
-4. **Verify Ping Endpoint:**
-   ```bash
    curl -i http://localhost:8080/api/v1/ping
    ```
-   *(Show HTTP 200 returning `{"status":"ok","time":"..."}`)*
+   *(Point out `status: UP` and the database component reporting `UP`.)*
