@@ -1,0 +1,225 @@
+{
+  "info": {
+    "_postman_id": "shortlink-api-v1-collection",
+    "name": "ShortLink API v1",
+    "description": "Production-grade URL Shortener & Redirect Engine API collection for ShortLink.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create Short Link (Auto Code)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"longUrl\": \"https://github.com/samarth-kamble-7/shortlink\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links"]
+        },
+        "description": "Creates a short link using the 64-bit Snowflake generator and Base62 encoder. Expects 201 Created."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Create Short Link (Custom Alias)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"longUrl\": \"https://en.wikipedia.org/wiki/Distributed_computing\",\n  \"customAlias\": \"my-portfolio\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links"]
+        },
+        "description": "Creates a short link with a custom vanity alias. Expects 201 Created."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Create Short Link (With Expiry)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"longUrl\": \"https://spring.io/projects/spring-boot\",\n  \"customAlias\": \"spring-boot-exp\",\n  \"expiresAt\": \"2029-12-31T23:59:59Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links"]
+        },
+        "description": "Creates a short link with an explicit TTL expiration date in UTC. Expects 201 Created."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Redirect (HTTP 302)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/my-portfolio",
+          "host": ["{{baseUrl}}"],
+          "path": ["my-portfolio"]
+        },
+        "description": "Redirects to the long destination URL. Expects HTTP 302 Found with Location header."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Get Link Details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links/my-portfolio",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links", "my-portfolio"]
+        },
+        "description": "Fetches metadata for a short link. Expects 200 OK."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Soft Delete Link",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links/my-portfolio",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links", "my-portfolio"]
+        },
+        "description": "Soft-deletes a link (sets is_active=false). Expects 204 No Content."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Error: Duplicate Custom Alias (409 Conflict)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"longUrl\": \"https://google.com\",\n  \"customAlias\": \"my-portfolio\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links"]
+        },
+        "description": "Attempts to claim an existing alias. Expects 409 Conflict."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Error: SSRF Blocked Localhost (400 Bad Request)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"longUrl\": \"http://localhost:8080/actuator/health\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links"]
+        },
+        "description": "Attempts to shorten an internal/localhost URL. Blocked by SSRF protection. Expects 400 Bad Request."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Error: Reserved Alias Blocked (400 Bad Request)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"longUrl\": \"https://google.com\",\n  \"customAlias\": \"actuator\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/links",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "links"]
+        },
+        "description": "Attempts to claim a reserved system word. Expects 400 Bad Request."
+      },
+      "response": []
+    },
+    {
+      "name": "10. Error: Redirect to Deleted Link (410 Gone)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/my-portfolio",
+          "host": ["{{baseUrl}}"],
+          "path": ["my-portfolio"]
+        },
+        "description": "Attempts to redirect using a soft-deleted short link. Expects 410 Gone."
+      },
+      "response": []
+    },
+    {
+      "name": "11. Actuator Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/actuator/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["actuator", "health"]
+        },
+        "description": "Checks application and database health. Expects 200 OK (UP)."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
