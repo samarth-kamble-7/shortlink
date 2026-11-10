@@ -1,5 +1,6 @@
 package com.shortlink.api;
 
+import com.shortlink.cache.LinkCacheService;
 import com.shortlink.domain.LinkRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,10 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -33,11 +36,22 @@ class LinkControllerIntegrationTest {
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
+    @Container
+    @ServiceConnection(name = "redis")
+    static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
+            .withExposedPorts(6379);
+
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
     private LinkRepository linkRepository;
+
+    @Autowired
+    private LinkCacheService linkCacheService;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     private MockMvc mockMvc;
 
@@ -45,6 +59,12 @@ class LinkControllerIntegrationTest {
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         linkRepository.deleteAll();
+        linkCacheService.clearL1();
+        if (stringRedisTemplate.getConnectionFactory() != null) {
+            try (var conn = stringRedisTemplate.getConnectionFactory().getConnection()) {
+                conn.serverCommands().flushDb();
+            }
+        }
     }
 
     @Test
