@@ -4,9 +4,9 @@ ShortLink is a production-grade, distributed URL shortening and click-analytics 
 
 ## Project Status
 
-- **Current Phase**: Phase 1 - Modular Monolith
-- **Milestone**: Day 5 - Docker Packaging, Single-Command Compose & k6 Redirect Benchmarks
-- **Status**: **Phase 1 Complete**. Full stack containerized with hardened multi-stage Dockerfile, automated PostgreSQL 16 orchestration via Docker Compose, 40/40 tests passing, and baseline k6 load test verified.
+- **Current Phase**: Phase 2 Complete - Distributed Caching, Rate Limiting & Telemetry
+- **Milestone**: Day 8 - Extreme Load Benchmarking, Java 25 Virtual Threads & Micrometer Observability
+- **Status**: **Phase 2 Complete**. Full multi-tier caching (`L1 Caffeine -> L2 Redis -> Postgres`), atomic Redis+Lua Token Bucket rate limiting, Java 25 Virtual Threads, Micrometer metrics, and 44/44 tests passing.
 
 ## Architecture
 
@@ -19,27 +19,30 @@ ShortLink is designed as a modular monolith transitioning to an event-driven dis
    - `com.shortlink.service`: Core URL shortening, SSRF defense, vanity alias validation, and HTTP 302 redirect engine
    - `com.shortlink.idgen`: Twitter Snowflake 64-bit ID generator with Base62 encoding and backward clock-drift protection
    - `com.shortlink.domain`: JPA entities, Flyway migrations, and derived repository queries
-   - `com.shortlink.config`: Infrastructure, database, and security configurations
-1. **Upcoming Distributed Components (Phase 2 & Beyond)**:
-   - Multi-tier caching: Caffeine local cache + Redis distributed cache-aside (targeting >50,000 req/sec)
-   - Async click analytics: Kafka event streaming with an isolated consumer service
+   - `com.shortlink.config`: Infrastructure, database, cache, and security configurations
+1. **Distributed Caching & Protection (Phase 2 Complete)**:
+   - `com.shortlink.cache`: Multi-tier Cache-Aside (`L1 Caffeine` < 0.1ms + `L2 Redis` < 1ms) with negative caching, striped stampede protection, and fail-open fallback
+   - `com.shortlink.ratelimit`: Atomic Redis + Lua Token Bucket rate limiter (`WRITE` & `READ` tiers) with `X-RateLimit-*` headers and `429 Too Many Requests`
+   - Java 25 Virtual Threads + Micrometer Actuator telemetry (`cache.gets`, `shortlink.ratelimit.requests`)
+1. **Upcoming Event-Driven & Sharded Components (Phase 3 & Phase 4)**:
+   - Async click analytics: Apache Kafka event streaming with GeoIP / User-Agent enrichment
    - Scalable data layer: Consistent-hash sharding across multiple PostgreSQL instances
-   - Observability: Prometheus metrics, Grafana dashboards, and Actuator health checks
+   - Observability: Prometheus + Grafana dashboards
 
-## Benchmarks & Baseline Performance (Phase 1)
 
-Measured via automated `k6` load testing directly against PostgreSQL 16 (zero cache):
+## Benchmarks: Phase 1 vs. Phase 2
 
-- **Redirect Throughput**: **2,353 requests/sec** (50 concurrent VUs, 58,998 total requests)
-- **Redirect Latency**:
-  - `p95`: **2.95 ms** (Target `< 10ms` easily achieved)
-  - `p90`: **2.21 ms**
-  - `median`: **995 µs** (Sub-millisecond redirect resolution)
-  - `average`: **1.30 ms**
-- **HTTP Error Rate**: **0.00%** (0 out of 58,998 requests failed)
-- **Automated Test Suite**: **40 / 40 passed (100%)**
+Measured via automated `k6` load tests running in Docker:
 
-_(Phase 2 will introduce Redis + Caffeine caching to push throughput beyond 50,000 req/sec)._
+  | Metric | Phase 1 Baseline (Direct Postgres, 50 VUs, 10ms pacing) | Phase 2 Extreme Stress (L1+L2 Cache + Rate Limit + Virtual Threads, 200 VUs, ZERO pacing) |
+  | :--- | :--- | :--- |
+  | **Sustained Throughput** | **2,353 req/s** | **10,920 req/s** _(4.6x throughput under 4x concurrency)_ |
+  | **Total Requests Handled** | 58,998 (in 25s) | **396,815** (in 35s) |
+  | **L1 Cache Hit Ratio** | N/A (100% DB reads) | **100.00%** _(0 DB hits across 396k redirects)_ |
+  | **Min Latency** | 253.08 µs | **204.50 µs** |
+  | **p95 Latency** | 2.95 ms | **27.29 ms** _(at full 200-VU saturation with Redis Lua checks)_ |
+  | **HTTP Failure Rate** | **0.00%** | **0.00%** (0 out of 396,815 failed) |
+  | **Automated Test Suite** | 40 / 40 passed | **44 / 44 passed (100%)** |
 
 ## Video Recording Guides (YouTube Series)
 
@@ -51,6 +54,9 @@ Detailed presenter walkthroughs, spoken video scripts, and code explanations map
 - **[Episode 3: Flyway Schema Migrations, Partial Indexing & JPA](docs/video/Episode_03_Flyway_Database_Migration_and_JPA.md)**
 - **[Episode 4: Core REST APIs, Redirect Engine & SSRF Defense](docs/video/Episode_04_REST_APIs_Redirect_Engine_and_Postman.md)**
 - **[Episode 5: Production Docker Packaging & k6 Benchmarks](docs/video/Episode_05_Production_Docker_and_k6_Benchmarks.md)**
+- **[Episode 6: Multi-Tier Caching (L1 Caffeine + L2 Redis)](docs/video/Episode_06_Redis_Caffeine_Caching.md)**
+- **[Episode 7: Distributed Rate Limiting (Redis + Lua)](docs/video/Episode_07_Distributed_Rate_Limiting_Redis_Lua.md)**
+- **[Episode 8: Phase 2 Extreme k6 Benchmarks & Virtual Threads](docs/video/Episode_08_Phase2_Extreme_k6_Benchmarks.md)**
 
 ## Prerequisites
 
@@ -80,12 +86,25 @@ Verify application health:
 curl -i http://localhost:8080/actuator/health
 ```
 
-### 2. Run k6 Load Benchmark
+### 2. Run k6 Load Benchmarks
 
-Run the automated 50-VU redirect load test using the official Grafana k6 container:
+Run the Phase 1 baseline 50-VU redirect load test:
 
 ```bash
 docker run --rm -i --network shortlink_default -e TARGET_URL=http://app:8080 grafana/k6:latest run - < k6/baseline-redirect-test.js
+```
+
+Run the Phase 2 extreme zero-pacing 200-VU stress test:
+
+```bash
+docker run --rm -i --network shortlink_default -e TARGET_URL=http://app:8080 grafana/k6:latest run - < k6/extreme-cached-stress-test.js
+```
+
+Inspect live Micrometer L1 Cache & Rate-Limit metrics:
+
+```bash
+curl -s "http://localhost:8080/actuator/metrics/cache.gets?tag=cache:shortlink.l1.cache&tag=result:hit"
+curl -s "http://localhost:8080/actuator/metrics/shortlink.ratelimit.requests?tag=outcome:allowed"
 ```
 
 ### 3. Local Development (Optional)
