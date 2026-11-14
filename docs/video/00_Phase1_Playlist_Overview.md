@@ -68,6 +68,8 @@ This directory contains the exact, word-for-word scripts, screen walkthroughs, s
 | Episode                                                                                 | Title & Topic                                    | Key Architecture / Files                                                                               |
 | :-------------------------------------------------------------------------------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
 | **[Episode 18](./Episode_18_NextJS_Frontend_Scaffolding_and_Design_System.md)**        | **Next.js Scaffolding & Anti-Slop Design System** | Clean Next.js 16 setup, untouched shadcn UI (`base-nova`), Anti-Slop Manifesto, Geist font pairing    |
+| **[Episode 19](./Episode_19_Server_Actions_Secure_Auth_and_Custom_Hooks.md)**          | **Server Actions & Secure Cookie Auth**          | Next.js Server Actions, HTTP-only JWT cookies, TanStack Query `useAuth`, silent token refresh, shadcn |
+
 
 
 ---
