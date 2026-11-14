@@ -54,12 +54,21 @@ This directory contains the exact, word-for-word scripts, screen walkthroughs, s
 
 ---
 
-### Phase 5 (Bonus): High Availability & Load Balancing
+### Phase 5: High Availability, Load Balancing & Auth
 
 | Episode                                                                                 | Title & Topic                                    | Key Architecture / Files                                                                               |
 | :-------------------------------------------------------------------------------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
 | **[Episode 16](./Episode_16_Nginx_Load_Balancer_and_Zero_Downtime_Failover.md)**        | **Nginx Load Balancer & Zero-Downtime Failover** | Nginx `least_conn`, `proxy_next_upstream` retry, multi-node Snowflake worker IDs, cluster Prometheus |
 | **[Episode 17](./Episode_17_Distributed_Authentication_JWT_and_MultiTenancy.md)**       | **Stateless JWT Auth & Multi-Tenancy**           | Spring Security, Stateless JWT, Redis Refresh Token revocation, Snowflake User IDs, Private Dashboard |
+
+---
+
+### Phase 6: Client Frontend & Production UI
+
+| Episode                                                                                 | Title & Topic                                    | Key Architecture / Files                                                                               |
+| :-------------------------------------------------------------------------------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| **[Episode 18](./Episode_18_NextJS_Frontend_Scaffolding_and_Design_System.md)**        | **Next.js Scaffolding & Anti-Slop Design System** | Clean Next.js 16 setup, untouched shadcn UI (`base-nova`), Anti-Slop Manifesto, Geist font pairing    |
+
 
 ---
 

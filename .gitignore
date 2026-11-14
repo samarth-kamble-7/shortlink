@@ -35,3 +35,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node / Next.js Client ###
+client/node_modules/
+client/.next/
+client/out/
+client/build/
+.pnpm-store/
+
