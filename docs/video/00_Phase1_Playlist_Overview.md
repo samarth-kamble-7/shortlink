@@ -59,6 +59,7 @@ This directory contains the exact, word-for-word scripts, screen walkthroughs, s
 | Episode                                                                                 | Title & Topic                                    | Key Architecture / Files                                                                               |
 | :-------------------------------------------------------------------------------------- | :----------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
 | **[Episode 16](./Episode_16_Nginx_Load_Balancer_and_Zero_Downtime_Failover.md)**        | **Nginx Load Balancer & Zero-Downtime Failover** | Nginx `least_conn`, `proxy_next_upstream` retry, multi-node Snowflake worker IDs, cluster Prometheus |
+| **[Episode 17](./Episode_17_Distributed_Authentication_JWT_and_MultiTenancy.md)**       | **Stateless JWT Auth & Multi-Tenancy**           | Spring Security, Stateless JWT, Redis Refresh Token revocation, Snowflake User IDs, Private Dashboard |
 
 ---
 

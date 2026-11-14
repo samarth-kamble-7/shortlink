@@ -122,6 +122,7 @@ Full word-for-word scripts, screen recordings, architectural slides, and termina
 | **Episode 14** | Prometheus Telemetry & Automated Grafana Provisioning        | [Episode_14_Prometheus_and_Grafana_Observability_Stack.md](docs/video/Episode_14_Prometheus_and_Grafana_Observability_Stack.md) |
 | **Episode 15** | Capstone Load Benchmarks & Complete System Polish (Finale)   | [Episode_15_Phase4_Capstone_and_Extreme_Benchmarks.md](docs/video/Episode_15_Phase4_Capstone_and_Extreme_Benchmarks.md)         |
 | **Episode 16** | Nginx L7 Load Balancer & Zero-Downtime Automatic Failover    | [Episode_16_Nginx_Load_Balancer_and_Zero_Downtime_Failover.md](docs/video/Episode_16_Nginx_Load_Balancer_and_Zero_Downtime_Failover.md) |
+| **Episode 17** | Distributed User Authentication, Stateless JWT & Multi-Tenancy | [Episode_17_Distributed_Authentication_JWT_and_MultiTenancy.md](docs/video/Episode_17_Distributed_Authentication_JWT_and_MultiTenancy.md) |
 
 ---
 
