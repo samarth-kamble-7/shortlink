@@ -11,6 +11,7 @@ import { PasswordInput } from "@/components/auth/password-input";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { registerAction } from "@/app/actions/auth-actions";
 import { toast } from "sonner";
 
 export default function SignUpPage() {
@@ -39,11 +40,14 @@ export default function SignUpPage() {
     setShake(false);
 
     try {
-      // Simulating API latency (TODO: Call registerAction from auth-actions.ts)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const res = await registerAction({
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+      });
 
-      if (data.email === "taken@shortlink.io") {
-        throw new Error("An account with this email already exists");
+      if (!res.success) {
+        throw new Error(res.error || "Registration failed");
       }
 
       setIsSuccess(true);

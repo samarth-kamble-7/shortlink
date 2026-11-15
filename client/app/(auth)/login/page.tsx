@@ -11,7 +11,7 @@ import { PasswordInput } from "@/components/auth/password-input";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { setSessionAction } from "@/app/actions/auth-actions";
+import { loginAction } from "@/app/actions/auth-actions";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -39,14 +39,14 @@ export default function LoginPage() {
     setShake(false);
 
     try {
-      // Simulating API latency (TODO: Call loginAction from auth-actions.ts)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const res = await loginAction({
+        email: data.email,
+        password: data.password,
+      });
 
-      if (data.email === "error@shortlink.io") {
-        throw new Error("Invalid email or password");
+      if (!res.success) {
+        throw new Error(res.error || "Invalid email or password");
       }
-
-      await setSessionAction(data.email);
 
       setIsSuccess(true);
       toast.success("Welcome back!", {
