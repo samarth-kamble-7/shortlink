@@ -15,7 +15,7 @@ import {
   Menu,
 } from "lucide-react";
 import { logoutAction, UserProfile } from "@/app/actions/auth-actions";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface TopBarProps {
@@ -32,6 +32,12 @@ export function TopBar({
   onOpenMobileMenu,
 }: TopBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const pageTitle = pathname.startsWith("/analytics")
+    ? "Analytics"
+    : pathname.startsWith("/settings")
+    ? "Settings"
+    : "Links";
 
   const handleLogout = async () => {
     await logoutAction();
@@ -60,7 +66,7 @@ export function TopBar({
         <div className="flex items-center gap-2 font-mono text-xs">
           <span className="text-muted-foreground font-sans font-medium">Workspace</span>
           <span className="text-muted-foreground/60">/</span>
-          <span className="font-semibold text-foreground">Links</span>
+          <span className="font-semibold text-foreground">{pageTitle}</span>
         </div>
       </div>
 

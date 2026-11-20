@@ -1,44 +1,64 @@
-"use client";
-
+import { Suspense } from "react";
+import { getMyLinksAction } from "@/app/actions/link-actions";
+import { getProfileAction } from "@/app/actions/auth-actions";
+import { getAggregatedAnalyticsAction } from "@/app/actions/analytics-actions";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { BarChart3, Clock } from "lucide-react";
+import { AnalyticsView } from "@/components/analytics/analytics-view";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export const metadata = {
+  title: "Analytics & Telemetry — ShortLink",
+  description: "Real-time click streams, time-series windows, GeoIP enrichment, and Kafka streaming aggregation.",
+};
+
+async function AnalyticsContent() {
+  const [links, userProfile] = await Promise.all([
+    getMyLinksAction(),
+    getProfileAction(),
+  ]);
+
+  const initialData = await getAggregatedAnalyticsAction("24h", links);
+
+  return (
+    <DashboardShell links={links} userProfile={userProfile}>
+      <AnalyticsView initialLinks={links} initialData={initialData} />
+    </DashboardShell>
+  );
+}
+
+function AnalyticsSkeleton() {
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-64 rounded-lg" />
+        <Skeleton className="h-4 w-96 rounded-md" />
+      </div>
+
+      <Skeleton className="h-14 w-full rounded-2xl" />
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Skeleton className="h-24 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
+      </div>
+
+      <Skeleton className="h-[360px] w-full rounded-2xl" />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Skeleton className="h-48 rounded-2xl" />
+        <Skeleton className="h-48 rounded-2xl" />
+        <Skeleton className="h-48 rounded-2xl" />
+        <Skeleton className="h-48 rounded-2xl" />
+      </div>
+    </div>
+  );
+}
 
 export default function AnalyticsPage() {
   return (
-    <DashboardShell>
-      <div className="space-y-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Analytics & Telemetry
-            </h1>
-            <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
-              Day 21 Milestone
-            </Badge>
-          </div>
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            Real-time click streams, time-series windows, GeoIP heatmaps, and referrer telemetry.
-          </p>
-        </div>
-
-        <Card className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border-dashed border-border/80 bg-card/40 p-8 text-center backdrop-blur-xs">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-xs">
-            <BarChart3 className="h-7 w-7" />
-          </div>
-          <h3 className="font-heading text-lg font-bold text-foreground">
-            Click Stream Telemetry Pipeline
-          </h3>
-          <p className="mt-1.5 max-w-md text-xs sm:text-sm text-muted-foreground leading-relaxed">
-            In Day 21, this dashboard connects to our Spring Boot <code className="font-mono text-xs text-foreground bg-muted px-1.5 py-0.5 rounded">/api/v1/links/&#123;code&#125;/analytics/timeseries</code> and Kafka aggregation consumer for interactive charts and geographical breakdowns.
-          </p>
-          <div className="mt-5 flex items-center gap-2 text-xs font-mono text-muted-foreground">
-            <Clock className="h-3.5 w-3.5" />
-            <span>Scheduled for Episode 21</span>
-          </div>
-        </Card>
-      </div>
-    </DashboardShell>
+    <Suspense fallback={<AnalyticsSkeleton />}>
+      <AnalyticsContent />
+    </Suspense>
   );
 }

@@ -26,7 +26,7 @@ interface SidebarNavProps {
 
 const WORKSPACE_NAV = [
   { label: "Links", href: "/dashboard", icon: Link2, badgeKey: "links" },
-  { label: "Analytics", href: "/analytics", icon: BarChart2, badge: "Live" },
+  { label: "Analytics", href: "/analytics", icon: BarChart2 },
 ];
 
 const SYSTEM_NAV = [
@@ -117,13 +117,8 @@ export function SidebarNav({
                       <div className="flex flex-1 items-center justify-between min-w-0">
                         <span className="truncate">{item.label}</span>
                         {item.badgeKey === "links" && linksCount > 0 && (
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.2 font-mono text-[10px] font-bold text-primary">
+                          <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
                             {linksCount}
-                          </span>
-                        )}
-                        {item.badge && (
-                          <span className="rounded bg-muted px-1.5 py-0.2 font-mono text-[9px] font-medium text-muted-foreground">
-                            {item.badge}
                           </span>
                         )}
                       </div>
