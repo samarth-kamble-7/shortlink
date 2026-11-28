@@ -23,5 +23,5 @@ COPY --from=builder --chown=shortlink:shortlink /build/target/shortlink-*.jar ap
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-XX:+UseZGC", "-XX:+ZGenerational", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseSerialGC", "-Xms128m", "-Xmx320m", "-XX:+TieredCompilation", "-XX:TieredStopAtLevel=1", "-jar", "app.jar"]
 
