@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: shortlink-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATA_REDIS_HOST
+        sync: false
+      - key: SPRING_DATA_REDIS_PORT
+        value: "6379"
+      - key: SPRING_DATA_REDIS_PASSWORD
+        sync: false
+      - key: SPRING_DATA_REDIS_SSL_ENABLED
+        value: "true"
+      - key: SHORTLINK_BASE_URL
+        value: "https://shortlink-six-nu.vercel.app"
+      - key: SHORTLINK_ANALYTICS_KAFKA_ENABLED
+        value: "false"
+      - key: SHORTLINK_SHARDING_ENABLED
+        value: "false"
+      - key: SHORTLINK_JWT_SECRET
+        generateValue: true

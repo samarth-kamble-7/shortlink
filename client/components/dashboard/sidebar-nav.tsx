@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -59,9 +60,7 @@ export function SidebarNav({
                 collapsed ? "justify-center w-full" : ""
               )}
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-xs">
-                <Link2 className="h-4 w-4" />
-              </div>
+              <Logo size={28} className="shrink-0" />
               {!collapsed && (
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-heading text-base font-bold tracking-tight text-foreground truncate">

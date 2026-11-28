@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Link2 } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export function Navbar() {
   const { user, isAuthenticated, logout, isLoggingOut } = useAuth();
@@ -17,23 +16,13 @@ export function Navbar() {
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="flex items-center gap-2.5 font-semibold tracking-tight text-foreground"
+            className="flex items-center gap-2.5 font-semibold tracking-tight text-foreground group"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-foreground text-background">
-              <Link2 className="h-4 w-4" />
-            </div>
-            <span className="font-mono text-sm font-bold tracking-tight">ShortLink</span>
+            <Logo size={28} className="transition-transform group-hover:scale-105" />
+            <span className="font-mono text-sm font-bold tracking-tight">
+              ShortLink
+            </span>
           </Link>
-
-          {/* Telemetry Status Beacon */}
-          <div className="hidden items-center gap-2 sm:flex">
-            <Badge variant="outline" className="gap-1.5 border-border bg-muted/30 font-mono text-[11px] font-normal text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>Nginx Cluster</span>
-              <span className="text-border">|</span>
-              <span className="text-foreground font-medium">&lt;1ms</span>
-            </Badge>
-          </div>
         </div>
 
         {/* Right Nav */}
@@ -63,7 +52,11 @@ export function Navbar() {
           ) : (
             <div className="flex items-center gap-2">
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
                   Sign In
                 </Button>
               </Link>
@@ -79,4 +72,3 @@ export function Navbar() {
     </header>
   );
 }
-

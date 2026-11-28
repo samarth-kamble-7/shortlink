@@ -20,16 +20,11 @@ export async function createLinkAction(
     const cookieStore = await cookies();
     const token = cookieStore.get(ACCESS_COOKIE)?.value;
 
-    if (!token) {
-      return {
-        success: false,
-        error: "Your session has expired. Please refresh or sign in again.",
-      };
-    }
-
     const validated = createLinkSchema.parse(data);
     const link = await createLinkApi(validated, token);
-    revalidatePath("/dashboard");
+    if (token) {
+      revalidatePath("/dashboard");
+    }
     return { success: true, link };
   } catch (err: unknown) {
     const message =

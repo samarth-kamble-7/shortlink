@@ -3,7 +3,7 @@ import { LinkItem, CreateLinkFormData } from "@/lib/link-schemas";
 const BACKEND_INTERNAL_URL =
   process.env.BACKEND_INTERNAL_URL || "http://localhost:8080";
 const SHORT_BASE_URL =
-  process.env.NEXT_PUBLIC_SHORT_BASE_URL || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_SHORT_BASE_URL || "https://shortlink-six-nu.vercel.app";
 
 /**
  * Fetches the user's real links from Spring Boot GET /api/v1/links/me.
@@ -80,16 +80,16 @@ export async function createLinkApi(
   data: CreateLinkFormData,
   token?: string
 ): Promise<LinkItem> {
-  if (!token) {
-    throw new Error("You must be signed in to create a link");
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const res = await fetch(`${BACKEND_INTERNAL_URL}/api/v1/links`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify({
       longUrl: data.longUrl,
       customAlias: data.customAlias?.trim() || null,

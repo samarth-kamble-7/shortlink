@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Link2 } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { HeroLinkAnimation } from "@/components/auth/hero-link-animation";
 
@@ -25,9 +25,7 @@ export function AuthShell({ children }: AuthShellProps) {
         {/* Brand Header */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
-              <Link2 className="h-5 w-5" />
-            </div>
+            <Logo size={36} className="transition-transform group-hover:scale-105 shrink-0" />
             <span className="font-heading text-xl font-bold tracking-tight text-foreground">
               ShortLink
             </span>

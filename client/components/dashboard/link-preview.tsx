@@ -12,7 +12,7 @@ interface LinkPreviewProps {
 export function LinkPreview({
   longUrl,
   customAlias,
-  baseUrl = "localhost:8080",
+  baseUrl = "shortlink-six-nu.vercel.app",
 }: LinkPreviewProps) {
   // Extract hostname or initial
   let domain = "your-domain.com";
